@@ -1,0 +1,68 @@
+image: node:8.10
+
+stages:
+  - build
+  - test
+  - lint
+  - deploy
+
+build:
+  stage: build
+  script:
+    - yarn
+  cache:
+    paths:
+      - node_modules/
+  artifacts:
+    paths:
+      - node_modules/
+
+test:
+  stage: test
+  script:
+    - yarn cover
+  variables:
+    NODE_ENV: "github"
+
+lint:
+  stage: lint
+  script:
+    - yarn lint
+
+# Branch deployment (to staging)
+deploy_branch_staging:
+  stage: deploy
+  when: manual
+  except:
+    - master
+  environment:
+    name: staging
+  before_script:
+    - echo "install deployment tools"
+  script:
+    - echo "yarn deploy -- staging"
+
+# Staging deployment
+deploy_staging:
+  stage: deploy
+  only:
+    - master
+  environment:
+    name: staging
+  before_script:
+    - echo "install deployment tools"
+  script:
+    - echo "yarn deploy -- staging"
+
+# Production deployment
+deploy_production:
+  stage: deploy
+  when: manual
+  only:
+    - master
+  environment:
+    name: production
+  before_script:
+    - echo "install deployment tools"
+  script:
+    - echo "yarn deploy -- production"
